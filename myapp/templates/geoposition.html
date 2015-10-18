@@ -18,7 +18,7 @@
     Lat:<input id="latbox" name="lat" val="" />
     Long:<input id="lngbox" name="long" val="" />
     <input id="address" type="textbox" value="">
-    <input type="button" value="Geocode" onclick="codeAddress()">
+    <input type="button" value="Geocode" onclick="searchAddress()">
     <div id="map"></div>
     <script>
 
@@ -40,20 +40,16 @@ function initMap() {
     animation: google.maps.Animation.DROP,
     position: {lat: 59.327, lng: 18.067}
   });
-
+  geocoder = new google.maps.Geocoder();
   google.maps.event.addListener(marker, 'dragend', function (event) {
-    //console.log("holi");
-    document.getElementById("latbox").value = this.getPosition().lat();
-    document.getElementById("lngbox").value = this.getPosition().lng();
-    console.log(this.getPosition().lat());
-    console.log(this.getPosition().lng());
+    setLatLng(marker.getPosition().lat(), marker.getPosition().lng());
+    reverse_geocoding(this.getPosition().lat(), this.getPosition().lng())
 });
-geocoder = new google.maps.Geocoder();
 }
-function codeAddress() {
-        var address = document.getElementById('address').value;
-        geocoder.geocode( { 'address': address}, function(results, status) {
-          console.log(results);
+function searchAddress() {
+        var address = document.getElementById('address').value; // para mayor exactitud, agregar el distrito despues de una coma
+        // Av. Aramburu 995, San Isidro
+        geocoder.geocode( { 'address': address, componentRestrictions: {country: 'PE'}}, function(results, status) {
           if (status == google.maps.GeocoderStatus.OK) {
             map.setCenter(results[0].geometry.location);
             if(marker){
@@ -65,19 +61,36 @@ function codeAddress() {
                 draggable: true,
                 animation: google.maps.Animation.DROP,
                 position: results[0].geometry.location
+            });
 
-            });
+            console.log(results[0].address_components[2]['long_name']);
+            console.log(results[0].formatted_address);
+
             google.maps.event.addListener(marker, "dragend", function() {
-              document.getElementById('latbox').value = marker.getPosition().lat();
-              document.getElementById('lngbox').value = marker.getPosition().lng();
+              setLatLng(marker.getPosition().lat(), marker.getPosition().lng());
+              reverse_geocoding(this.getPosition().lat(), this.getPosition().lng())
             });
-            document.getElementById('latbox').value = marker.getPosition().lat();
-            document.getElementById('lngbox').value = marker.getPosition().lng();
+            setLatLng(marker.getPosition().lat(), marker.getPosition().lng());
+
           } else {
             alert('Geocode was not successful for the following reason: ' + status);
           }
         });
       }
+
+    function reverse_geocoding(lat, lng){
+      var latlng = {lat: parseFloat(lat), lng: parseFloat(lng)};
+      geocoder.geocode({'location': latlng}, function(results, status) {
+        console.log("results of drag",results);
+        console.log(results[0].address_components[2]['long_name']);
+        console.log(results[0].formatted_address);
+      });
+    }
+
+    function setLatLng(lat, lng){
+      document.getElementById('latbox').value = lat;
+      document.getElementById('lngbox').value = lng;
+    }
 
 
     </script>
