@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
-    <title>Reverse Geocoding</title>
+    <title>Marker Animations</title>
     <style>
       html, body {
         height: 100%;
@@ -13,83 +12,76 @@
       #map {
         height: 100%;
       }
-#floating-panel {
-  position: absolute;
-  top: 10px;
-  left: 25%;
-  z-index: 5;
-  background-color: #fff;
-  padding: 5px;
-  border: 1px solid #999;
-  text-align: center;
-  font-family: 'Roboto','sans-serif';
-  line-height: 30px;
-  padding-left: 10px;
-}
-
-    </style>
-    <style>
-      #floating-panel {
-        position: absolute;
-        top: 5px;
-        left: 50%;
-        margin-left: -180px;
-        width: 350px;
-        z-index: 5;
-        background-color: #fff;
-        padding: 5px;
-        border: 1px solid #999;
-      }
-      #latlng {
-        width: 225px;
-      }
     </style>
   </head>
   <body>
-    <div id="floating-panel">
-      <input id="latlng" type="text" value="-12.1018831,-77.020347">
-      <input id="submit" type="button" value="Reverse Geocode">
-    </div>
+    Lat:<input id="latbox" name="lat" val="" />
+    Long:<input id="lngbox" name="long" val="" />
+    <input id="address" type="textbox" value="">
+    <input type="button" value="Geocode" onclick="codeAddress()">
     <div id="map"></div>
     <script>
-      function initMap() {
-        var map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 11,
-          center: {lat: -12.0552581, lng: -77.0802908}
-        });
-        var geocoder = new google.maps.Geocoder;
-        var infowindow = new google.maps.InfoWindow;
 
-        document.getElementById('submit').addEventListener('click', function() {
-          geocodeLatLng(geocoder, map, infowindow);
-        });
-      }
+// The following example creates a marker in Stockholm, Sweden using a DROP
+// animation. Clicking on the marker will toggle the animation between a BOUNCE
+// animation and no animation.
 
-      function geocodeLatLng(geocoder, map, infowindow) {
-        var input = document.getElementById('latlng').value;
-        var latlngStr = input.split(',', 2);
-        var latlng = {lat: parseFloat(latlngStr[0]), lng: parseFloat(latlngStr[1])};
-        geocoder.geocode({'location': latlng}, function(results, status) {
-          if (status === google.maps.GeocoderStatus.OK) {
-            if (results[1]) {
-              map.setZoom(18);
-              var marker = new google.maps.Marker({
-                position: latlng,
-                map: map
-              });
-              infowindow.setContent(results[1].formatted_address);
-              infowindow.open(map, marker);
-            } else {
-              window.alert('No results found');
+var marker;
+var map;
+function initMap() {
+  map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 13,
+    center: {lat: 59.325, lng: 18.070}
+  });
+
+  marker = new google.maps.Marker({
+    map: map,
+    draggable: true,
+    animation: google.maps.Animation.DROP,
+    position: {lat: 59.327, lng: 18.067}
+  });
+
+  google.maps.event.addListener(marker, 'dragend', function (event) {
+    //console.log("holi");
+    document.getElementById("latbox").value = this.getPosition().lat();
+    document.getElementById("lngbox").value = this.getPosition().lng();
+    console.log(this.getPosition().lat());
+    console.log(this.getPosition().lng());
+});
+geocoder = new google.maps.Geocoder();
+}
+function codeAddress() {
+        var address = document.getElementById('address').value;
+        geocoder.geocode( { 'address': address}, function(results, status) {
+          console.log(results);
+          if (status == google.maps.GeocoderStatus.OK) {
+            map.setCenter(results[0].geometry.location);
+            if(marker){
+              marker.setMap(null);
             }
+            map.setZoom(18);
+            marker = new google.maps.Marker({
+                map: map,
+                draggable: true,
+                animation: google.maps.Animation.DROP,
+                position: results[0].geometry.location
+
+            });
+            google.maps.event.addListener(marker, "dragend", function() {
+              document.getElementById('latbox').value = marker.getPosition().lat();
+              document.getElementById('lngbox').value = marker.getPosition().lng();
+            });
+            document.getElementById('latbox').value = marker.getPosition().lat();
+            document.getElementById('lngbox').value = marker.getPosition().lng();
           } else {
-            window.alert('Geocoder failed due to: ' + status);
+            alert('Geocode was not successful for the following reason: ' + status);
           }
         });
       }
 
+
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCQSs659gWdskg7-bdZjcOaCDIUD-QgtBA&signed_in=true&callback=initMap"
-        async defer></script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCQSs659gWdskg7-bdZjcOaCDIUD-QgtBA&signed_in=true&callback=initMap"></script>
   </body>
 </html>

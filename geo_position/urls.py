@@ -17,8 +17,10 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 from myapp.views import HomeTemplateView
+from myapp.views import AdminTemplateView
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^$', HomeTemplateView.as_view(), name='home')
+    url(r'^$', HomeTemplateView.as_view(), name='home'),
+    url(r'^set/$', AdminTemplateView.as_view(), name='set'),
 ]
