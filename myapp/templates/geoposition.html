@@ -13,6 +13,7 @@
         height: 100%;
       }
     </style>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
   </head>
   <body>
     Lat:<input id="latbox" name="lat" val="" />
@@ -20,7 +21,7 @@
     <input id="address" type="textbox" value="">
     <input type="button" value="Geocode" onclick="searchAddress()">
     <div id="map"></div>
-    <script>
+    <script type="text/javascript">
 
 // The following example creates a marker in Stockholm, Sweden using a DROP
 // animation. Clicking on the marker will toggle the animation between a BOUNCE
@@ -46,6 +47,13 @@ function initMap() {
     reverse_geocoding(this.getPosition().lat(), this.getPosition().lng())
 });
 }
+
+  $("#address").on("keydown",function search(e) {
+    if(e.keyCode == 13) {
+      searchAddress();
+    }
+});
+
 function searchAddress() {
         var address = document.getElementById('address').value; // para mayor exactitud, agregar el distrito despues de una coma
         // Av. Aramburu 995, San Isidro
